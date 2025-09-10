@@ -1591,6 +1591,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   menuCanvas: {fileID: 304840463}
+  tabController: {fileID: 1393405236}
+  tabButtons: []
 --- !u!114 &1007128675
 MonoBehaviour:
   m_ObjectHideFlags: 0
