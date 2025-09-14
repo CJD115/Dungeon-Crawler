@@ -11,11 +11,7 @@ using UnityEngine.Tilemaps;
 public class SimpleRandomWalkDungeonGenerator : AbstractDungeonGenerator
 {
     [SerializeField]
-    private int iterations = 10; // Number of random walk iterations
-    [SerializeField]
-    public int walkLength = 10; // Length of each random walk
-    [SerializeField]
-    public bool StartRandomlyEachIteration = true; // Whether to start each iteration at a random floor position
+    private SimpleRandomWalkData randomWalkParameters;
 
     /// <summary>
     /// Runs the procedural generation process and logs the generated floor positions.
@@ -35,11 +31,11 @@ public class SimpleRandomWalkDungeonGenerator : AbstractDungeonGenerator
     {
         var currentPosition = startPosition;
         HashSet<Vector2Int> floorPositions = new HashSet<Vector2Int>();
-        for (int i = 0; i < iterations; i++)
+        for (int i = 0; i < randomWalkParameters.iterations; i++)
         {
-            var path = ProceduralGenerationAlgorithms.SimpleRandomWalk(currentPosition, walkLength);
+            var path = ProceduralGenerationAlgorithms.SimpleRandomWalk(currentPosition, randomWalkParameters.walkLength);
             floorPositions.UnionWith(path);
-            if (StartRandomlyEachIteration)
+            if (randomWalkParameters.startRandomlyEachIteration)
             {
                 currentPosition = floorPositions.ElementAt(UnityEngine.Random.Range(0, floorPositions.Count));
             }
