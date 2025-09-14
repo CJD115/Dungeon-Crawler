@@ -20,15 +20,54 @@ public class CorridorFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
     {
         HashSet<Vector2Int> floorPositions = new HashSet<Vector2Int>();
         HashSet<Vector2Int> potentialRoomPositions = new HashSet<Vector2Int>();
+        HashSet<Vector2Int> roomFloors = new HashSet<Vector2Int>();
 
         CreateCorridors(floorPositions, potentialRoomPositions);
 
+        List<Vector2Int> deadEnds = FindAllDeadEnds(floorPositions);
+
+        CreateRoomsAtDeadEnds(deadEnds, roomFloors);
+
         HashSet<Vector2Int> roomPositions = CreateRooms(potentialRoomPositions);
 
+        floorPositions.UnionWith(roomFloors);
         floorPositions.UnionWith(roomPositions);
 
         tilemapVisualizer.PaintFloorTiles(floorPositions);
         WallGenerator.CreateWalls(floorPositions, tilemapVisualizer);
+    }
+
+    private void CreateRoomsAtDeadEnds(List<Vector2Int> deadEnds, HashSet<Vector2Int> roomFloors)
+    {
+        foreach (var position in deadEnds)
+        {
+            if (roomFloors.Contains(position) == false)
+            {
+                var room = RunRandomWalk(randomWalkParameters, position);
+                roomFloors.UnionWith(room);
+            }
+        }
+    }
+
+    private List<Vector2Int> FindAllDeadEnds(HashSet<Vector2Int> floorPositions)
+    {
+        List<Vector2Int> deadEnds = new List<Vector2Int>();
+        foreach (var position in floorPositions)
+        {
+            int neighborsCount = 0;
+            foreach (var direction in Direction2D.cardinalDirectionsList)
+            {
+                if (floorPositions.Contains(position + direction))
+                {
+                    neighborsCount++;
+                }
+            }
+            if (neighborsCount == 1)
+            {
+                deadEnds.Add(position);
+            }
+        }
+        return deadEnds;
     }
 
     private HashSet<Vector2Int> CreateRooms(HashSet<Vector2Int> potentialRoomPositions)
