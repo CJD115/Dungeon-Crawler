@@ -8,24 +8,19 @@ using UnityEngine.Tilemaps;
 /// <summary>
 /// Generates dungeon layouts using a simple random walk algorithm.
 /// </summary>
-public class SimpleRandomWalkDungeonGenerator : MonoBehaviour
+public class SimpleRandomWalkDungeonGenerator : AbstractDungeonGenerator
 {
-    [SerializeField]
-    protected Vector2Int startPosition = Vector2Int.zero; // Starting position for the random walk
-
     [SerializeField]
     private int iterations = 10; // Number of random walk iterations
     [SerializeField]
     public int walkLength = 10; // Length of each random walk
     [SerializeField]
     public bool StartRandomlyEachIteration = true; // Whether to start each iteration at a random floor position
-    [SerializeField]
-    private TilemapVisualizer tilemapVisualizer; // Reference to the TilemapVisualizer component
 
     /// <summary>
     /// Runs the procedural generation process and logs the generated floor positions.
     /// </summary>
-    public void RunProceduralGeneration()
+    protected override void RunProceduralGeneration()
     {
         HashSet<Vector2Int> floorPositions = RunRandomWalk();
         tilemapVisualizer.Clear();
@@ -51,5 +46,6 @@ public class SimpleRandomWalkDungeonGenerator : MonoBehaviour
         }
         return floorPositions;
     }
+
 }
 
