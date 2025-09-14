@@ -35,6 +35,10 @@ public class TilemapVisualizer : MonoBehaviour
         {
             PaintSingleTile(tilemap, tile, position);
         }
+        if (tilemap != null)
+        {
+            tilemap.RefreshAllTiles();
+        }
     }
 
     private void PaintSingleTile(Tilemap tilemap, TileBase tile, Vector2Int position)
