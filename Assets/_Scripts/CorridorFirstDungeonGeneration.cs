@@ -8,6 +8,9 @@ public class CorridorFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 {
     [SerializeField]
     private int corridorLength = 14, corridorCount = 5;
+    [SerializeField]
+    [Range(0, 3)]
+    private int corridorBrushSize = 0; // 0 = no widening, 1 = 3-wide, etc.
     [SerializeField, Range(0.1f, 1f)]
     private float roomPercentage = 0.8f;
 
@@ -22,14 +25,38 @@ public class CorridorFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         HashSet<Vector2Int> potentialRoomPositions = new HashSet<Vector2Int>();
         HashSet<Vector2Int> roomFloors = new HashSet<Vector2Int>();
 
-        CreateCorridors(floorPositions, potentialRoomPositions);
+        // Create corridors and get the raw corridor lists so we can widen them (video approach)
+        List<List<Vector2Int>> corridors = CreateCorridors(floorPositions, potentialRoomPositions);
 
-        List<Vector2Int> deadEnds = FindAllDeadEnds(floorPositions);
+        // First, union raw (thin) corridors so we can detect dead-ends on the thin layout
+        HashSet<Vector2Int> rawCorridorFloor = new HashSet<Vector2Int>();
+        foreach (var corridor in corridors)
+        {
+            rawCorridorFloor.UnionWith(corridor);
+        }
 
+        // Find dead ends on the raw corridors and create rooms there
+        List<Vector2Int> deadEnds = FindAllDeadEnds(rawCorridorFloor);
         CreateRoomsAtDeadEnds(deadEnds, roomFloors);
-
         HashSet<Vector2Int> roomPositions = CreateRooms(potentialRoomPositions);
 
+        // Now decide corridor footprint: widen corridors if requested, otherwise use raw
+        if (corridorBrushSize > 0)
+        {
+            HashSet<Vector2Int> widened = new HashSet<Vector2Int>();
+            foreach (var corridor in corridors)
+            {
+                var expanded = IncreaseCorridorBrush3by3(corridor); // video helper
+                widened.UnionWith(expanded);
+            }
+            floorPositions.UnionWith(widened);
+        }
+        else
+        {
+            floorPositions.UnionWith(rawCorridorFloor);
+        }
+
+        // Finally add rooms
         floorPositions.UnionWith(roomFloors);
         floorPositions.UnionWith(roomPositions);
 
@@ -85,8 +112,9 @@ public class CorridorFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         return roomPositions;
     }
 
-    private void CreateCorridors(HashSet<Vector2Int> floorPositions, HashSet<Vector2Int> potentialRoomPositions)
+    private List<List<Vector2Int>> CreateCorridors(HashSet<Vector2Int> floorPositions, HashSet<Vector2Int> potentialRoomPositions)
     {
+        var corridors = new List<List<Vector2Int>>();
         var currentPosition = startPosition;
         potentialRoomPositions.Add(currentPosition);
 
@@ -95,7 +123,26 @@ public class CorridorFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
             var corridor = ProceduralGenerationAlgorithms.RandomWalkCorridor(currentPosition, corridorLength);
             currentPosition = corridor[corridor.Count - 1];
             potentialRoomPositions.Add(currentPosition);
-            floorPositions.UnionWith(corridor);
+            corridors.Add(corridor);
         }
+
+        return corridors;
+    }
+    // Video-style 3x3 brush widening helper
+    private List<Vector2Int> IncreaseCorridorBrush3by3(List<Vector2Int> corridor)
+    {
+        var result = new HashSet<Vector2Int>();
+        foreach (var pos in corridor)
+        {
+            // 3x3 around the tile
+            for (int x = -1; x <= 1; x++)
+            {
+                for (int y = -1; y <= 1; y++)
+                {
+                    result.Add(new Vector2Int(pos.x + x, pos.y + y));
+                }
+            }
+        }
+        return result.ToList();
     }
 }
