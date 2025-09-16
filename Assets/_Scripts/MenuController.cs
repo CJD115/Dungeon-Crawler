@@ -28,12 +28,18 @@ public class MenuController : MonoBehaviour
         // Toggle menu on/off when Escape is pressed (new Input System)
         if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
         {
+                if(!menuCanvas.activeSelf && PauseController.IsGamePaused)
+                {
+                    // If the game is paused and the menu is not active, do nothing
+                    return;
+                }
             bool willOpen = !menuCanvas.activeSelf;
             menuCanvas.SetActive(willOpen);
             if (willOpen && tabController != null)
             {
                 StartCoroutine(ForceTab0AndRestoreTabs());
             }
+            PauseController.SetPause(menuCanvas.activeSelf);
         }
     }
 
