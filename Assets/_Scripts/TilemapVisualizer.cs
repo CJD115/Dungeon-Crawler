@@ -11,7 +11,8 @@ public class TilemapVisualizer : MonoBehaviour
     [SerializeField]
     private Tilemap floorTilemap, wallTilemap; // Reference to the tilemap for floor tiles
     [SerializeField]
-    private TileBase floorTile, wallTop; // The tile asset used for floor tiles
+    private TileBase floorTile, wallTop, wallSideRight, wallSideLeft, wallBottom, wallFull,
+        wallInnerCornerDownLeft, wallInnerCornerDownRight, wallDiagonalCornerDownRight, wallDiagonalCornerDownLeft, wallDiagonalCornerUpLeft, wallDiagonalCornerUpRight; // The tile asset used for floor tiles
 
 
 
@@ -45,12 +46,10 @@ public class TilemapVisualizer : MonoBehaviour
     {
         if (tilemap == null)
         {
-            Debug.LogWarning($"Tilemap is null when trying to paint at {position}");
             return;
         }
         if (tile == null)
         {
-            Debug.LogWarning($"Tile is null when trying to paint at {position}");
             return;
         }
         // The incoming positions are grid coordinates (cell coords). Use Vector3Int directly.
@@ -71,19 +70,32 @@ public class TilemapVisualizer : MonoBehaviour
         }
     }
 
-    internal void PaintSingleBasicWall(Vector2Int position)
+    internal void PaintSingleBasicWall(Vector2Int position, string binaryType)
     {
-        if (wallTilemap == null)
+        int typeAsInt = Convert.ToInt32(binaryType, 2);
+        TileBase tile = null;
+        if (WallTypesHelper.wallTop.Contains(typeAsInt))
         {
-            Debug.LogWarning($"wallTilemap is null, cannot paint wall at {position}");
-            return;
-        }
-        if (wallTop == null)
+            tile = wallTop;
+        } 
+        else if (WallTypesHelper.wallSideLeft.Contains(typeAsInt))
         {
-            Debug.LogWarning($"wallTop tile is null. Cannot paint wall at {position}");
-            return;
+            tile = wallSideLeft;
         }
-        PaintSingleTile(wallTilemap, wallTop, position);
+        else if (WallTypesHelper.wallSideRight.Contains(typeAsInt))
+        {
+            tile = wallSideRight;
+        }
+        else if (WallTypesHelper.wallBottom.Contains(typeAsInt))
+        {
+            tile = wallBottom;
+        }
+        else
+        {
+            tile = wallFull; // Fallback to full wall if no match found
+        }
+        if (tile != null)
+            PaintSingleTile(wallTilemap, tile, position);
     }
 
     public void ClearWalls()
@@ -93,4 +105,47 @@ public class TilemapVisualizer : MonoBehaviour
             wallTilemap.ClearAllTiles();
         }
     }
+
+    internal void PaintSingleCornerWall(Vector2Int position, string BinaryType)
+    {
+        int typeAsInt = Convert.ToInt32(BinaryType, 2);
+        TileBase tile = null;
+
+        if (WallTypesHelper.wallInnerCornerDownLeft.Contains(typeAsInt))
+        {
+            tile = wallInnerCornerDownLeft;
+        }
+        else if (WallTypesHelper.wallInnerCornerDownRight.Contains(typeAsInt))
+        {
+            tile = wallInnerCornerDownRight;
+        }
+        else if (WallTypesHelper.wallDiagonalCornerDownRight.Contains(typeAsInt))
+        {
+            tile = wallDiagonalCornerDownRight;
+        }
+        else if (WallTypesHelper.wallDiagonalCornerDownLeft.Contains(typeAsInt))
+        {
+            tile = wallDiagonalCornerDownLeft;
+        }
+        else if (WallTypesHelper.wallDiagonalCornerUpLeft.Contains(typeAsInt))
+        {
+            tile = wallDiagonalCornerUpLeft;
+        }
+        else if (WallTypesHelper.wallDiagonalCornerUpRight.Contains(typeAsInt))
+        {
+            tile = wallDiagonalCornerUpRight;
+        }
+        else if (WallTypesHelper.wallFullEightDirections.Contains(typeAsInt))
+        {
+            tile = wallFull;
+        }
+        else if (WallTypesHelper.wallBottmEightDirections.Contains(typeAsInt))
+        {
+            tile = wallBottom;
+        }
+        if (tile != null)
+                PaintSingleTile(wallTilemap, tile, position);
+        
+    }
+
 }
