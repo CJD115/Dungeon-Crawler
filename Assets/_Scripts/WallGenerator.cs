@@ -6,7 +6,7 @@ public static class WallGenerator
 {
     public static void CreateWalls(HashSet<Vector2Int> floorPositions, TilemapVisualizer tilemapVisualizer)
     {
-        var basicWallPositions = FindWallsInDirections(floorPositions, Direction2D.cardinalDirectionsList);
+        var basicWallPositions = FindWallsInDirections(floorPositions, ProceduralGenerationAlgorithms.Direction2D.cardinalDirectionsList);
         Debug.Log($"[WallGenerator] Found {basicWallPositions.Count} wall positions");
         if (tilemapVisualizer == null)
         {
