@@ -18,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (PauseController.IsGamePaused)
         {
-            rb.velocity = Vector2.zero;
+            rb.linearVelocity = Vector2.zero;
             animator.SetBool("isWalking", false);
             return;
         }
